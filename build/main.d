@@ -13,7 +13,8 @@ main.o: /home/ziggy/Desktop/GBAGame/microgames/MicroGames/source/main.c \
  /opt/devkitpro/libtonc/include/tonc_surface.h \
  /opt/devkitpro/libtonc/include/tonc_video.h \
  /opt/devkitpro/libtonc/include/tonc_nocash.h \
- /opt/devkitpro/libtonc/include/tonc_text.h
+ /opt/devkitpro/libtonc/include/tonc_text.h \
+ /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/macros.h
 /opt/devkitpro/libtonc/include/tonc.h:
 /opt/devkitpro/libtonc/include/tonc_types.h:
 /opt/devkitpro/libtonc/include/tonc_memmap.h:
@@ -29,3 +30,4 @@ main.o: /home/ziggy/Desktop/GBAGame/microgames/MicroGames/source/main.c \
 /opt/devkitpro/libtonc/include/tonc_video.h:
 /opt/devkitpro/libtonc/include/tonc_nocash.h:
 /opt/devkitpro/libtonc/include/tonc_text.h:
+/home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/macros.h:
