@@ -14,13 +14,15 @@ void inflate(int time,int hits,int *fail);
 void bite(int time,int speed,int *fail);
 void catch_(int speed,int *fail);
 void shake(int time,int hits,int *fail);
+//void boss(int time,int *fail);
 
 OBJ_ATTR *init_timer();
 void updateTimer(int time,int count,OBJ_ATTR* TIMER);
 
 void GameChoose(int time,int hits,int speed,int *fail){
-    u16 r = rand();   
-    switch(r%3){
+
+    srand(REG_TM3D);
+    switch(rand()%4){
         case 0:
             inflate(time,hits,fail);
             break;
@@ -30,9 +32,13 @@ void GameChoose(int time,int hits,int speed,int *fail){
         case 2:
             catch_(speed/2,fail);
             break;
+        case 3:
+            shake(time,hits,fail);
+            break;
         default:
         break;
     }
+
     return;
 }
 
@@ -48,12 +54,14 @@ int main(){
 
     int*fail;
     int x=0,y=20,i,lives=4,combo=0,ii=0;
-    int time=300,speed=2,hits=8;
+    int time=300,speed=2,hits=8,score=0;
     fail = malloc(sizeof (int));
 
-    //REG_TM2D=4000; -0x  
-   // REG_TM2CNT= TM_FREQ_64;   // we're using the 1024 cycle timer
-   // REG_TM3CNT= TM_ENABLE | TM_CASCADE;
+    tte_init_con();
+    REG_TM2D=-0x6000;
+    
+    REG_TM2CNT= TM_FREQ_1024|TM_ENABLE; // we're using the 1024 cycle timer
+    REG_TM3CNT= TM_ENABLE | TM_CASCADE;
 
     tte_init_se_default(0,BG_CBB(0)|BG_SBB(31));
     
@@ -84,7 +92,7 @@ int main(){
 
     while(1){
     REG_DISPCNT= DCNT_MODE0 |DCNT_BG3|DCNT_BG0;
-
+    lives =4; combo = 0; score = 0;
 
     //INIT MENU TEXT
     tte_write("#{P:35,55}");
@@ -116,12 +124,15 @@ int main(){
         GameChoose(time,hits,speed,fail);
         if(*fail == 1){
             lives--;
+        }else{
+            score++;
         }
         combo++;
         vid_vsync();
-        tte_write("#{P:45,50}LIVES: ");
-        *(u16 *)0x0600f996 =0xD010+(0x0001*lives);
-       // tte_write("#{P:45,80}SCORE: ");
+        //tte_write("#{P:45,50}LIVES: ");
+
+        tte_printf("#{P:45,50}LIVES: %d ",lives);
+        tte_printf("#{P:45,80}SCORE: %d ",score);
        // *(u16 *)0x0600fa96 =0xD010+(0x0001*combo);
         while(ii<30){
             ii++;
@@ -332,7 +343,7 @@ void bite(int time,int speed, int *fail){
         t++;
 
     }
-    while(i<30){
+    while(i<45){
         if(x>=150){
             m=-1*speed;
         }
@@ -354,11 +365,11 @@ void bite(int time,int speed, int *fail){
 
 void catch_(int speed,int *fail){
 
-    int by=0,bx=0,px=125,py=100;
+    int by=0,bx=0,px=125,py=100,ii=0;
     *fail=1;
     flashText("CATCH!!    ");
 
-    bx = 10+20*(rand()%8);
+    bx = 15+20*(rand()%8);
     init_timer();
 
     memcpy32(&tile_mem[4][0],paddleTiles,32);
@@ -386,9 +397,9 @@ void catch_(int speed,int *fail){
 
     while(1){
         vid_vsync();
-        by+=speed;
+        by+=(speed/2)+1;
         key_poll();
-        px += 2*key_tri_horz();
+        px += (2*speed)*key_tri_horz();
        
         if(by>=py-16){
             if(px>bx-32&&px<bx+32){
@@ -405,6 +416,10 @@ void catch_(int speed,int *fail){
         oam_copy(oam_mem, obj_buffer, 3);
 
     }
+    while(ii<15){
+        vid_vsync();
+        ii++;
+    }
     GAME_RETURN();
     return;
 
@@ -418,7 +433,7 @@ void shake(int time,int hits,int *fail){
 
     flashText("SHAKE!!    ");
 
-    memcpy(&tile_mem[4][0],shakerTiles,tubeTilesLen);
+    memcpy(&tile_mem[4][0],shakerTiles,shakerTilesLen);
     memcpy32(pal_obj_bank[0],shakerPal,16);
     oam_init(obj_buffer, 128);
 
@@ -429,13 +444,13 @@ void shake(int time,int hits,int *fail){
     obj_set_attr(shaker,ATTR0_SQUARE,ATTR1_SIZE_64x64,
                 ATTR2_PALBANK(0)|0);
     shaker->attr2= ATTR2_BUILD(0, 0, 0);//tid, pb, ??
-    obj_set_pos(shaker, 50,36);
+    obj_set_pos(shaker, 100,36);
 
     OBJ_ATTR *glass = &obj_buffer[2];
     obj_set_attr(glass,ATTR0_SQUARE,ATTR1_SIZE_64x64,
                 ATTR2_PALBANK(0)|192);
     glass->attr2= ATTR2_BUILD(192, 0, 0);//tid, pb, ??
-    obj_set_pos(glass, 164, 100);
+    obj_set_pos(glass, 132, 68);
 
     vid_vsync();
     oam_copy(oam_mem, obj_buffer, 5);
@@ -447,7 +462,7 @@ void shake(int time,int hits,int *fail){
             vid_vsync();
             oam_copy(oam_mem, obj_buffer, 3);
             h++;
-            if(h=hits){
+            if(h==hits){
                 shaker->attr2= ATTR2_BUILD(128, 0, 0);//tid, pb, ??
                 *fail = 0;
 
@@ -472,6 +487,39 @@ void shake(int time,int hits,int *fail){
     return;
 
 }
+
+/*void boss(int time,int *fail){
+    int i=0,t=0;
+    *fail=1;
+    u16 boss_seq[11] = {KEY_UP,KEY_UP,KEY_DOWN,KEY_DOWN,KEY_LEFT,KEY_RIGHT,KEY_LEFT,KEY_RIGHT,KEY_A,KEY_B,KEY_START};
+    //print sequence
+    
+    tte_printf("#{P:20,40}\n    /\\\n    /\\\n    \\/\n    \\/\n    <-\n    ->\n    <-\n    ->\n    A\n    B\n    START\n    ");
+    REG_DISPCNT= DCNT_OBJ | DCNT_OBJ_1D |DCNT_MODE0|DCNT_BG3|DCNT_BG2|DCNT_BG0;
+    while(t<time){
+        key_poll();
+        if(key_hit(boss_seq[i]))
+        {
+            i++;
+            tte_write("#{P:20,40}\n");
+        }
+        if(i>=11){
+            *fail=0;
+            t=time;
+        }
+        vid_vsync();
+        t++;
+    }
+    i=0;
+
+    while(i<30){
+        vid_vsync();
+        i++;
+    }
+    GAME_RETURN();
+    return;
+}
+*/
 
 
 OBJ_ATTR *init_timer(){
