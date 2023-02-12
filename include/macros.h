@@ -7,6 +7,8 @@
 #include "mouth.h"
 #include "ball.h"
 #include "paddle.h"
+#include "pump.h"
+#include "shaker.h"
 #ifndef __MACROS__
 #define __MACROS__
 

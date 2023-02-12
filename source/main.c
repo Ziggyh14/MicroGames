@@ -13,6 +13,7 @@ OBJ_ATTR empty_buffer[128];
 void inflate(int time,int hits,int *fail);
 void bite(int time,int speed,int *fail);
 void catch_(int speed,int *fail);
+void shake(int time,int hits,int *fail);
 
 OBJ_ATTR *init_timer();
 void updateTimer(int time,int count,OBJ_ATTR* TIMER);
@@ -90,7 +91,7 @@ int main(){
     tte_write("Ziggy's Mega Micro Games!");
 
     tte_write("#{P:45,65}");
-    tte_write("Press: Start");
+    tte_write("Press: A");
 
     while(1){
         vid_vsync();
@@ -134,7 +135,7 @@ int main(){
     
 
     REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG3;
-    tte_write("You LOOSE\n");
+    tte_write("\nYou LOOSE\n");
     tte_write("Press A to try again");
 
     //REG_DISPCNT= RESET_VRAM;
@@ -143,6 +144,9 @@ int main(){
         if(key_hit(KEY_A)){
             break;
         }
+        x++;
+        vid_vsync();
+        REG_BG3HOFS= x;
     }
     tte_erase_screen();
     }
@@ -177,11 +181,13 @@ void inflate(int time,int hits, int *fail)
     //REG_DISPCNT = RESET_VRAM;
     
 
-    flashText("INFLATE!!!    ");
+    flashText("PUMP!!    ");
 
     //SET UP SPRITE -------------------------------------------------
     memcpy(&tile_mem[4][0],tubeTiles,tubeTilesLen);
     memcpy32(pal_obj_bank[0],tubePal,16);
+    memcpy32(&tile_mem[4][128],pumpTiles,512);
+    memcpy16(pal_obj_bank[1],pumpPal,16);
     oam_init(obj_buffer, 128);
 	REG_DISPCNT= DCNT_OBJ | DCNT_OBJ_1D |DCNT_MODE0|DCNT_BG3|DCNT_BG2;
     OBJ_ATTR *guy = &obj_buffer[1];
@@ -203,9 +209,15 @@ void inflate(int time,int hits, int *fail)
     guy2->attr2= ATTR2_BUILD(0, 0, 0);//tid, pb, ??
     obj_set_pos(guy2, 140, 70);
 
+    OBJ_ATTR *pump = &obj_buffer[4];
+    obj_set_attr(pump,ATTR0_TALL,ATTR1_SIZE_32x64,
+                ATTR2_PALBANK(1)|128);
+    pump->attr2= ATTR2_BUILD(128,1, 0);//tid, pb, ??
+    obj_set_pos(pump, 170, 70);
+
     OBJ_ATTR* timer =  init_timer();
     vid_vsync();
-    oam_copy(oam_mem, obj_buffer, 4);
+    oam_copy(oam_mem, obj_buffer, 5);
 
 
     //tte_init_se_default(0,BG_CBB(0)|BG_SBB(31));
@@ -214,6 +226,10 @@ void inflate(int time,int hits, int *fail)
     while((h<hits) && (t<=time)){
         key_poll();
         if(key_hit(KEY_A)){
+            pump->attr2= ATTR2_BUILD(128+32, 1, 0);//tid, pb, ??
+            vid_vsync();
+            oam_copy(oam_mem, obj_buffer, 5);	// only need to update one
+
             h++;
             p = (h/(hits/3));
             switch(p){
@@ -241,9 +257,11 @@ void inflate(int time,int hits, int *fail)
         }
         }
         t++;
+        pump->attr2= ATTR2_BUILD(128, 1, 0);//tid, pb, ??
+
         updateTimer(time,t,timer);
         vid_vsync();
-        oam_copy(oam_mem, obj_buffer, 4);	// only need to update one
+        oam_copy(oam_mem, obj_buffer, 5);	// only need to update one
 
     }
 
@@ -258,8 +276,9 @@ void inflate(int time,int hits, int *fail)
 
 void bite(int time,int speed, int *fail){
 
-    int t=0,x=20,y=64,i=0,m=1*speed;
+    int t=0,x,y=64,i=0,m=1*speed;
     *fail = 1;
+    x=(rand()%5)*20;
 
     flashText("BITE!!    ");
 
@@ -267,6 +286,7 @@ void bite(int time,int speed, int *fail){
     memcpy32(&tile_mem[4][128],cowTiles,512);
     memcpy16(pal_obj_bank[0],mouthPal,16);
     memcpy16(pal_obj_bank[3],cowPal,16);
+    oam_init(obj_buffer, 128);
 
     OBJ_ATTR *mouth = &obj_buffer[1];
     obj_set_attr(mouth,ATTR0_SQUARE,ATTR1_SIZE_64x64,
@@ -334,23 +354,24 @@ void bite(int time,int speed, int *fail){
 
 void catch_(int speed,int *fail){
 
-    int by=0,bx=0,px=100,py=100;
+    int by=0,bx=0,px=125,py=100;
     *fail=1;
     flashText("CATCH!!    ");
 
-    bx = 80*(rand()%3);
+    bx = 10+20*(rand()%8);
     init_timer();
 
     memcpy32(&tile_mem[4][0],paddleTiles,32);
     memcpy32(&tile_mem[4][4],ballTiles,128);
     memcpy16(pal_obj_bank[0],paddlePal,16);
     memcpy16(pal_obj_bank[3],ballPal,16);
+    oam_init(obj_buffer, 128);
 
     OBJ_ATTR *paddle = &obj_buffer[1];
     obj_set_attr(paddle,ATTR0_WIDE,ATTR1_SIZE_32x8,
                 ATTR2_PALBANK(0)|0);
     paddle->attr2= ATTR2_BUILD(0, 0, 0);//tid, pb, ??
-    obj_set_pos(paddle,100,100);
+    obj_set_pos(paddle,px,py);
 
     
     OBJ_ATTR *o = &obj_buffer[2];
@@ -390,6 +411,67 @@ void catch_(int speed,int *fail){
 
 }
 
+void shake(int time,int hits,int *fail){
+
+    int t=0,h=0,i=0;
+    *fail =1;
+
+    flashText("SHAKE!!    ");
+
+    memcpy(&tile_mem[4][0],shakerTiles,tubeTilesLen);
+    memcpy32(pal_obj_bank[0],shakerPal,16);
+    oam_init(obj_buffer, 128);
+
+	REG_DISPCNT= DCNT_OBJ | DCNT_OBJ_1D |DCNT_MODE0|DCNT_BG3|DCNT_BG2;
+    
+    OBJ_ATTR *TIMER = init_timer();
+    OBJ_ATTR *shaker = &obj_buffer[1];
+    obj_set_attr(shaker,ATTR0_SQUARE,ATTR1_SIZE_64x64,
+                ATTR2_PALBANK(0)|0);
+    shaker->attr2= ATTR2_BUILD(0, 0, 0);//tid, pb, ??
+    obj_set_pos(shaker, 50,36);
+
+    OBJ_ATTR *glass = &obj_buffer[2];
+    obj_set_attr(glass,ATTR0_SQUARE,ATTR1_SIZE_64x64,
+                ATTR2_PALBANK(0)|192);
+    glass->attr2= ATTR2_BUILD(192, 0, 0);//tid, pb, ??
+    obj_set_pos(glass, 164, 100);
+
+    vid_vsync();
+    oam_copy(oam_mem, obj_buffer, 5);
+
+    while((h<hits) && (t<=time)){
+        key_poll();
+        if(key_hit(KEY_A)){
+            shaker->attr2= ATTR2_BUILD(64, 0, 0);//tid, pb, ??
+            vid_vsync();
+            oam_copy(oam_mem, obj_buffer, 3);
+            h++;
+            if(h=hits){
+                shaker->attr2= ATTR2_BUILD(128, 0, 0);//tid, pb, ??
+                *fail = 0;
+
+            }else{
+                shaker->attr2= ATTR2_BUILD(0, 0, 0);//tid, pb, ??
+
+            }
+        }
+        t++;
+
+        updateTimer(time,t,TIMER);
+        vid_vsync();
+        oam_copy(oam_mem, obj_buffer, 3);	// only need to update one
+
+    }
+
+    while(i<30){
+        vid_vsync();
+        i++;
+    }
+    GAME_RETURN();
+    return;
+
+}
 
 
 OBJ_ATTR *init_timer(){
