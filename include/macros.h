@@ -1,4 +1,12 @@
 #include <tonc.h>
+#include "ziggyzig.h"
+#include "frame.h"
+#include "tube.h"
+#include "timer.h"
+#include "cow.h"
+#include "mouth.h"
+#include "ball.h"
+#include "paddle.h"
 #ifndef __MACROS__
 #define __MACROS__
 

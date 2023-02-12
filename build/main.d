@@ -17,8 +17,12 @@ main.o: /home/ziggy/Desktop/GBAGame/microgames/MicroGames/source/main.c \
  /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/macros.h \
  /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/ziggyzig.h \
  /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/frame.h \
- /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/metr.h \
- /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/tube.h
+ /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/tube.h \
+ /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/timer.h \
+ /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/cow.h \
+ /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/mouth.h \
+ /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/ball.h \
+ /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/paddle.h
 /opt/devkitpro/libtonc/include/tonc.h:
 /opt/devkitpro/libtonc/include/tonc_types.h:
 /opt/devkitpro/libtonc/include/tonc_memmap.h:
@@ -37,5 +41,9 @@ main.o: /home/ziggy/Desktop/GBAGame/microgames/MicroGames/source/main.c \
 /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/macros.h:
 /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/ziggyzig.h:
 /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/frame.h:
-/home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/metr.h:
 /home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/tube.h:
+/home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/timer.h:
+/home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/cow.h:
+/home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/mouth.h:
+/home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/ball.h:
+/home/ziggy/Desktop/GBAGame/microgames/MicroGames/include/paddle.h:
